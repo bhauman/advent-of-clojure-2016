@@ -12,10 +12,7 @@ My [Advent of Code 2016](http://adventofcode.com/2016) Solutions in Clojure.
 
 ## How to use
 
-When you are finished working on the problem, there are solutions
-available for you to get another point of view on the problem.
-
-See the [`src/advent`](https://github.com/bhauman/advent-of-clojure-2016/tree/master/src/advent-of-code-2016) directory for the solutions.
+See the [`src/advent-of-clojure-2016`](https://github.com/bhauman/advent-of-clojure-2016/tree/master/src/advent-of-code-2016) directory for the solutions.
 
 ![advent tree](https://raw.githubusercontent.com/bhauman/advent-of-clojure/master/resources/advent_tree.png)
 
