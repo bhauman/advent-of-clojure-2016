@@ -14,7 +14,7 @@
 
 (defn checksum [word]
   (->> word
-       (reduce #(update-in %1 [%2] (fnil inc 0)) {})
+       frequencies
        (sort-by (fn [[a b]] [(- b) (int a)]))
        (map first)
        (take 5)))
