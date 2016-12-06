@@ -18,15 +18,12 @@
        (filter valid?)
        count)
 
-(defn rotate [x]
-  (vector (map first x)
-          (map second x)
-          (map last x)))
+(def transpose (partial apply mapv vector))
 
 ;; part 2
 #_(->> lines
        (map parse-triangle)
        (partition 3)
-       (mapcat rotate)
+       (mapcat transpose)
        (filter valid?)
        count)
