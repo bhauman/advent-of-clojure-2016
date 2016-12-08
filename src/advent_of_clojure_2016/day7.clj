@@ -36,10 +36,7 @@
 
 (defn ssl-inv? [[a b c :as x] [a1 b1 c1 :as y]]
   {:pre [(= 3 (count x)) (= 3 (count y)) (ssl? x)]}
-  (and
-   (not= a b)
-   (= a c b1)
-   (= b a1 c1)))
+  (and (= a b1) (= b a1 c1)))
 
 (defn contains-pred? [f s]
   (first (filter f (partition 3 1 s))))
