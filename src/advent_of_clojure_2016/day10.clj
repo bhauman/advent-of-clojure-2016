@@ -17,7 +17,6 @@
       \v  (vector :to (first addrs) (u/to-int (first (re-seq #"\d+" l))))
       \b  (cons :from addrs))))
 
-;; state shape
 ;; all commands originate at a unique bot
 #_(let [froms (map second (filter #(= (first %) :from) input))]
     (= (count froms) (count (set froms))))
