@@ -6,5 +6,6 @@
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [digest "1.4.4"]
                  [medley "0.8.4"]
+                 [net.mikera/core.matrix "0.57.0"]
                  [org.clojure/math.combinatorics "0.1.1"]
                  [org.clojure/core.match "0.2.2"]])
