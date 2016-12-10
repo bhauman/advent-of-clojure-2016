@@ -35,23 +35,23 @@
 #_(count (part1 data))
 ;; => 112830
 
-(declare mem-part2)
-
 (defn part2 [d]
   (loop [accum 0 data d]
     (cond
       (empty? data) accum
       (starts-with-directive? data)
-      (let [[ac s] (parse-directive data)]
-        (if (and ac (has-directive? ac))
-          (recur (+ accum (mem-part2 ac)) s)
-          (recur (+ accum (count ac)) s)))
+      (when-let [[[cnt rpt] s] (parse-dir data)]
+        (let [[part s] (split-at cnt s)]
+          (recur (+ accum
+                    (* rpt (if (has-directive? part) (part22 part) (count part))))
+                 s)))
       :else (recur (inc accum) (rest data)))))
 
-(def mem-part2 (memoize part2))
-
-#_(part22 "(27x12)(20x12)(13x14)(7x10)(1x12)A")
-#_(part22 "(25x3)(3x3)ABC(2x3)XY(5x2)PQRSTX(18x9)(3x2)TWO(5x7)SEVEN")
+#_(part2 "(27x12)(20x12)(13x14)(7x10)(1x12)A")
+#_(part2 "(25x3)(3x3)ABC(2x3)XY(5x2)PQRSTX(18x9)(3x2)TWO(5x7)SEVEN")
 
 #_(time (part2 data))
+
 ;; => 10931789799
+
+
