@@ -9,7 +9,7 @@
 
 (defn addr-names [l]
   (->> (re-seq #"(bot|output)\s(\d+)" l)
-       (map (fn [[_ a b]] (keyword (str a "_" b))))))
+       (map (comp keyword #(apply str %) rest))))
 
 (defn parse-line [l]
   (let [addrs (addr-names l)]
@@ -21,26 +21,26 @@
 #_(let [froms (map second (filter #(= (first %) :from) input))]
     (= (count froms) (count (set froms))))
 
-(defn give-value [accum [_ addr v]]
-  (update-in accum [addr] (fnil conj #{}) v))
+(defn give-to-addr [registers addr v]
+  (update registers addr (fnil conj #{}) v))
 
-(defn move-value [accum from to v]
-  {:pre [((get accum from) v)]} ;; must have val to give
-  (-> accum 
-      (update-in [from] disj v)
-      (give-value [nil to v])))
+(defn move-value [registers from to v]
+  {:pre [((get registers from) v)]} ;; must have val to give
+  (-> registers
+      (update from disj v)
+      (give-to-addr to v)))
 
 (defn make-init [commands]
-  {:commands (filter #(= (first %) :from) commands)
-   :registers (reduce give-value {} (filter #(= (first %) :to) commands))})
+  (let [{:keys [from to]} (group-by first commands)]
+    {:commands from
+     :registers (reduce #(apply give-to-addr %1 (rest %2)) {} to)}))
 
-(defn handle-bot-command [{:keys [registers] :as state} [_ from low-to high-to :as com]]
-  (let [[lv hv]   ((juxt first last) (sort (get registers from #{})))]
+(defn high-low-command [registers [_ from low-to high-to :as com]]
+  (let [[lv hv] ((juxt first last) (sort (get registers from #{})))]
     (assert (and lv hv (not= lv hv)))
-    (update-in state [:registers]
-               #(-> %
-                    (move-value from low-to lv)
-                    (move-value from high-to hv)))))
+    (-> registers
+        (move-value from low-to lv)
+        (move-value from high-to hv))))
 
 (defn active-registers [x] (->> x (filter #(>= (count (val %)) 2)) keys set))
 
@@ -48,7 +48,8 @@
   (let [active-regs                     (active-registers registers)
         [active-commands rest-commands] (u/pluck #(-> % second active-regs) commands)]
     (when-not (empty? active-commands)
-      (-> (reduce handle-bot-command state active-commands)
+      (-> state
+          (update :registers #(reduce high-low-command % active-commands))
           (assoc :commands rest-commands)))))
 
 ;; part 1
@@ -57,14 +58,14 @@
      (map :registers)
      (keep #(some (fn [[k v]] (when (empty? (difference #{61 17} v)) k)) %))
      first)
-;;=> :bot_161
+;;=> :bot161
 
 ;; part 2
 (->> (iterate transition-state (make-init (map parse-line data)))
      (take-while #(not (nil? %)))
      last
      :registers
-     (#(select-keys % [:output_0 :output_1 :output_2]))
+     (#(select-keys % [:output0 :output1 :output2]))
      vals
      (map first)
      (apply *))
