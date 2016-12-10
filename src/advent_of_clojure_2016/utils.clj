@@ -11,13 +11,14 @@
 
 (defn insert-at [x n i]
   (let [[a b] (split-at n x)]
-    (concat (conj (vec a) i) b)))
+    (into (conj (vec a) i) b)))
 
 (defn delete-at [x n]
   (let [[a b] (split-at n x)]
-    (concat a (rest b))))
+    (into (vec a) (rest b))))
 
+(defn pluck [pred list]
+  [(filter pred list) (remove pred list)])
 
 (def to-int #(Integer/parseInt %))
 (def to-ints (partial map to-int))
-
