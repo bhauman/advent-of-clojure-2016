@@ -73,11 +73,6 @@
             (distinct-by second)
             (filter (comp valid-floors? second)))))))
 
-#_(next-possible-states (to-canonical {:pos 3, :floors {0 #{-1}, 2 #{1}, 3 #{-10 10}}}))
-
-#_(map to-normal
- (new-possible-moves [1 [[0 0] [2 1] [2 1] [2 1] [2 1]]
-                     ]))
 ;; helpers to be able to look at the optimized state
 (defn to-normal* [n]
   (reduce (fn [accum [i [c g]]]
@@ -161,6 +156,8 @@
                            3 #{}}})
 
 ;; part 2
+;; this DOESN'T WORk
+;; much more optimization to do
 #_(def res
   (->> (time (doall (take 40 (search start-state2))))
        (map first)
