@@ -14,19 +14,14 @@
                            2 #{-10 -100 -1000 -10000}
                            3 #{}}})
 
-(def test-state
-  {:pos 0
-   :floors {0 #{-1 -10}
-            1 #{1}
-            2 #{10}
-            3 #{}}})
-
 (def valid-floors?
   (memoize
    (fn [n]
      (let [gens  (set (keep second n))
            chips (set (keep first (filter #(apply not= %) n)))]
        (empty? (intersection gens chips))))))
+
+(def finished-score 10000000)
 
 (def finished?
   (memoize
@@ -36,7 +31,9 @@
 (def score
   (memoize
    (fn [n]
-     (* 10 (count (filter #(= 3 %) (flatten n)))))))
+     (if (finished? n)
+       finished-score
+       (* 10 (count (filter #(= 3 %) (flatten n))))))))
 
 (def safe-elevator?
   (memoize
@@ -52,34 +49,40 @@
    (fn [[flr pairings]]
      (let [flattened   (vec (flatten pairings))
            lower-bound (reduce min flattened)
-           places      (map first (filter #(= (second %) flr)
-                                          (map-indexed vector flattened)))
-           positions'  (filter safe-elevator?
-                               (concat 
-                                (combo/combinations places 2)
-                                (map list places)))
+           places      (sequence
+                        (comp
+                         (map-indexed vector)
+                         (filter #(= (second %) flr))
+                         (map first))
+                         flattened)
+           positions'  (->> (map list places)
+                            (concat (combo/combinations places 2))
+                            (filter safe-elevator?))
            moves  (doall
                    (for [positions positions'
                          mod-fn    [inc dec]
                          ;; lower bound is a major optimization
-                         :when (<= lower-bound (mod-fn flr)  3)]
+                         :when (<= lower-bound (mod-fn flr) 3)]
                      [(mod-fn flr)
-                      (sort ;; sort to make it cannonical
-                       (map vec
-                            (partition 2 (reduce #(update-in %1 [%2] mod-fn)
-                                                 flattened
-                                                 positions))))]))]
-       (->> moves
-            (distinct-by second)
-            (filter (comp valid-floors? second)))))))
+                      (->> (reduce #(update-in %1 [%2] mod-fn) flattened positions)
+                           (partition 2)
+                           (map vec)
+                           sort)]))]
+       (sequence
+        (comp
+         (distinct-by second)
+         (filter (comp valid-floors? second))
+         (map #(vary-meta % assoc :score (score (second %)))))
+        moves)))))
 
-;; helpers to be able to look at the optimized state
+;; helpers to be able to look at and reason about the optimized state
 (defn to-normal* [n]
   (reduce (fn [accum [i [c g]]]
             (-> accum
-                (update-in [c] (fnil conj #{}) (int (- (Math/pow 10 i))))
-                (update-in [g] (fnil conj #{}) (int (Math/pow 10 i))))
-            ) (sorted-map) (map-indexed vector n)))
+                (update-in [c] conj (int (- (Math/pow 10 i))))
+                (update-in [g] conj (int (Math/pow 10 i)))))
+          (into (sorted-map) (zipmap (range 4) (repeat #{})))
+          (map-indexed vector n)))
 
 (defn to-normal [[flr pairings]]
   {:pos flr
@@ -98,55 +101,34 @@
 (defn to-canonical [{:keys [pos floors]}]
   [pos (canonical floors)])
 
-;; priority q
-(def make-priority-q sorted-map)
 
-(defn push-q [q pri v]
-  (update-in q [pri] (fnil conj []) v))
+(def state-score #(-> % second meta :score))
 
-(defn pop-q [priority-q]
-  (let [[k [v & xs]] (first priority-q)]
-    [v (if (empty? xs)
-         (dissoc priority-q k)
-         (assoc  priority-q k (vec xs)))]))
+;; do one level at a time
+(defn breadth-first-level [ordered-state-set]
+  (println "level" (count (ffirst ordered-state-set)))
+  (println "count" (count ordered-state-set))
+  (->> ordered-state-set
+       (mapcat (fn [[prev-states state]]
+                 (let [last-canonical (second (last prev-states))]
+                   (->> (next-possible-states state)
+                        (filter #(not= last-canonical (second %)))
+                        #_(filter (comp (complement (set prev-states)) second))
+                        (map #(vector (conj prev-states state) %))))))
+       (distinct-by second)
+       (sort-by state-score >)))
 
-(defn search-help [{:keys [prior-q]}]
-  (loop [priority-q prior-q]
-    (when (not-empty priority-q)
-      (let [[[prev-states state] priority-q] (pop-q priority-q)]
-        (cond
-          (finished? (second state))
-          (do
-            (clojure.pprint/pprint
-             [(count prev-states)
-              #_(map to-normal prev-states)
-              (to-normal state)])
-            {:result [(count prev-states)
-                      (map to-normal prev-states)
-                      (to-normal state)]
-             :prior-q priority-q})
-          :else
-          (recur
-           (let [last-canonical (second (last prev-states))]
-             (->> (next-possible-states state)
-                  ;; never look back
-                  (filter #(not= last-canonical (second %)))
-                  (reduce #(push-q %1
-                                   (- (count prev-states)
-                                      (score (second %2)))
-                                   [(conj prev-states state) %2])
-                          priority-q)))))))))
-
-(defn search [state]
-  (map :result
-         (rest (iterate search-help
-                 {:prior-q (push-q (make-priority-q) 0 [[] (to-canonical
-                                                            state)])}))))
+(defn breadth-first-search [limit start-state]
+  (->> (iterate breadth-first-level [[[] (to-canonical start-state)]])
+       (take-while #(and (not-empty %)
+                         (let [scr (state-score (first %))]
+                           (println "-" scr)
+                           (not= scr finished-score))))
+       (take limit)
+       count))
 
 ;; part 1
-#_(->> (time (doall (take 40 (search start-state))))
-       (map first)
-       (reduce min))
+#_(time (breadth-first-search 40 start-state))
 ;; => 33
 
 (def start-state2 {:pos 0
@@ -156,14 +138,6 @@
                            3 #{}}})
 
 ;; part 2
-;; this DOESN'T WORk
-;; much more optimization to do
-#_(def res
-  (->> (time (doall (take 40 (search start-state2))))
-       (map first)
-       #_(reduce min)))
-
-
-
-
+#_(time (breadth-first-search 60 start-state2))
+;; => 57
 
