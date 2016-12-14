@@ -22,3 +22,6 @@
 
 (def to-int #(Integer/parseInt %))
 (def to-ints (partial map to-int))
+
+(defn apply-times [n f init]
+  (loop [c 0 h init] (if (= c n) h (recur (inc c) (f h)))))
