@@ -2,7 +2,7 @@
   (:require
    [digest :refer [md5]]))
 
-(defn next-hash [salt i] (md5 (str salt i)))
+(def next-hash (comp md5 str))
 
 (defn stretched-hash [salt i]
   (loop [c 0 h (next-hash salt i)]
