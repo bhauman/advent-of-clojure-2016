@@ -49,35 +49,40 @@
    (fn [[flr pairings]]
      (let [flattened   (vec (flatten pairings))
            lower-bound (reduce min flattened)
-           places      (map first (filter #(= (second %) flr)
-                                          (map-indexed vector flattened)))
-           positions'  (filter safe-elevator?
-                               (concat 
-                                (combo/combinations places 2)
-                                (map list places)))
+           places      (sequence
+                        (comp
+                         (map-indexed vector)
+                         (filter #(= (second %) flr))
+                         (map first))
+                         flattened)
+           positions'  (->> (map list places)
+                            (concat (combo/combinations places 2))
+                            (filter safe-elevator?))
            moves  (doall
                    (for [positions positions'
                          mod-fn    [inc dec]
                          ;; lower bound is a major optimization
-                         :when (<= lower-bound (mod-fn flr)  3)]
+                         :when (<= lower-bound (mod-fn flr) 3)]
                      [(mod-fn flr)
-                      (sort ;; sort to make it cannonical
-                       (map vec
-                            (partition 2 (reduce #(update-in %1 [%2] mod-fn)
-                                                 flattened
-                                                 positions))))]))]
-       (->> moves
-            (distinct-by second)
-            (filter (comp valid-floors? second))
-            (map #(vary-meta % assoc :score (score (second %)))))))))
+                      (->> (reduce #(update-in %1 [%2] mod-fn) flattened positions)
+                           (partition 2)
+                           (map vec)
+                           sort)]))]
+       (sequence
+        (comp
+         (distinct-by second)
+         (filter (comp valid-floors? second))
+         (map #(vary-meta % assoc :score (score (second %)))))
+        moves)))))
 
-;; helpers to be able to look at the optimized state
+;; helpers to be able to look at and reason about the optimized state
 (defn to-normal* [n]
   (reduce (fn [accum [i [c g]]]
             (-> accum
-                (update-in [c] (fnil conj #{}) (int (- (Math/pow 10 i))))
-                (update-in [g] (fnil conj #{}) (int (Math/pow 10 i))))
-            ) (sorted-map) (map-indexed vector n)))
+                (update-in [c] conj (int (- (Math/pow 10 i))))
+                (update-in [g] conj (int (Math/pow 10 i)))))
+          (into (sorted-map) (zipmap (range 4) (repeat #{})))
+          (map-indexed vector n)))
 
 (defn to-normal [[flr pairings]]
   {:pos flr
