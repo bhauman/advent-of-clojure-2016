@@ -25,3 +25,11 @@
 
 (defn apply-times [n f init]
   (loop [c 0 h init] (if (= c n) h (recur (inc c) (f h)))))
+
+(defn indexes-by [f coll]
+  (sequence
+   (comp
+    (map-indexed vector)
+    (filter (comp f second))
+    (map first))
+   coll))

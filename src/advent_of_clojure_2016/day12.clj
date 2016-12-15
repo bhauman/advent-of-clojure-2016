@@ -10,7 +10,8 @@
   (->> s
        (string/split-lines)
        (map #(str "[" % "]"))
-       (map read-string)))
+       (map read-string)
+       vec))
 
 (def input (parse-instructions (slurp (io/resource "day12"))))
 
@@ -33,18 +34,17 @@
 (def start-state '{a 0 b 0 c 0 d 0 :pos 0})
 
 (defn run-prog [start-state input]
-  (let [input (vec input)
-        inst-count (count input)]
+  (let [input (vec input)]
     (take-while (comp not nil?)
-          (iterate (fn [{:keys [pos] :as s}]
-                     (when (and s (< pos inst-count))
-                       (let [inst (nth input pos)]
-                         (trans s inst))))
-                   start-state))))
+                (iterate (fn [{:keys [pos] :as s}]
+                           (when-let [inst (get input pos nil)]
+                             (trans s inst)))
+                         start-state))))
 
 ;; part 1
-#_(last (run-prog start-state input))
+#_ (time (last (run-prog start-state input)))
+;; => 317993
 
 ;; part 2
-#_(last (run-prog (assoc start-state 'c 1) input))
-
+#_ (time (last (run-prog (assoc start-state 'c 1) input)))
+;; => 9227647

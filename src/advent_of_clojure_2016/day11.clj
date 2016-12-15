@@ -23,10 +23,7 @@
 
 (def finished-score 10000000)
 
-(def finished?
-  (memoize
-   (fn [n]
-     (= #{[3 3]} (set n)))))
+(defn finished? [n] (= #{[3 3]} (set n)))
 
 (def score
   (memoize
@@ -49,31 +46,26 @@
    (fn [[flr pairings]]
      (let [flattened   (vec (flatten pairings))
            lower-bound (reduce min flattened)
-           places      (sequence
-                        (comp
-                         (map-indexed vector)
-                         (filter #(= (second %) flr))
-                         (map first))
-                         flattened)
+           places      (u/indexes-by #(= % flr) flattened)
            positions'  (->> (map list places)
                             (concat (combo/combinations places 2))
                             (filter safe-elevator?))
-           moves  (doall
-                   (for [positions positions'
-                         mod-fn    [inc dec]
-                         ;; lower bound is a major optimization
-                         :when (<= lower-bound (mod-fn flr) 3)]
-                     [(mod-fn flr)
-                      (->> (reduce #(update-in %1 [%2] mod-fn) flattened positions)
-                           (partition 2)
-                           (map vec)
-                           sort)]))]
-       (sequence
-        (comp
-         (distinct-by second)
-         (filter (comp valid-floors? second))
-         (map #(vary-meta % assoc :score (score (second %)))))
-        moves)))))
+           moves  (for [positions  positions'
+                        up-or-down [1 -1]
+                        :let  [next-floor (+ flr up-or-down)]
+                        :when (<= lower-bound next-floor 3)]
+                    [next-floor
+                     (->> (reduce #(assoc %1 %2 next-floor) flattened positions)
+                          (partition 2)
+                          (map vec)
+                          sort)])]
+       (doall
+        (sequence
+         (comp
+          (filter (comp valid-floors? second))
+          (distinct-by second)
+          (map #(vary-meta % assoc :score (score (second %)))))
+         moves))))))
 
 ;; helpers to be able to look at and reason about the optimized state
 (defn to-normal* [n]
@@ -116,7 +108,8 @@
                         #_(filter (comp (complement (set prev-states)) second))
                         (map #(vector (conj prev-states state) %))))))
        (distinct-by second)
-       (sort-by state-score >)))
+       (sort-by state-score >)
+       (take 500)))
 
 (defn breadth-first-search [limit start-state]
   (->> (iterate breadth-first-level [[[] (to-canonical start-state)]])
