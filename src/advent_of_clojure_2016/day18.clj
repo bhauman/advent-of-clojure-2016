@@ -4,15 +4,11 @@
   (str "...^^^^^..^...^...^^^^^^...^.^^^.^.^.^^.^^^"
        ".....^.^^^...^^^^^^.....^.^^...^^^^^...^.^^^.^^......^^^^"))
 
-(def t? #(= \^ %))
-
-(def nt? (complement t?))
-
-(defn next-trap? [[l c r]]
-  (if (or (and (t? l) (nt? c) (nt? r))
-          (and (nt? l) (nt? c) (t? r))
-          (and (t? l) (t? c) (nt? r))
-          (and (nt? l) (t? c) (t? r)))
+(defn next-trap? [x]
+  (if (or (= '(\^ \^ \.) x)
+          (= '(\^ \. \.) x)
+          (= '(\. \. \^) x)
+          (= '(\. \^ \^) x))
     \^ \.))
 
 (defn next-row [r]
@@ -23,7 +19,7 @@
 (defn find-answer [rows r]
   (->> (iterate next-row (vec r))
        (take rows)
-       (pmap #(count (filter nt? %)))
+       (pmap #(count (filter #{\.} %)))
        (reduce +)))
 
 ;; part 1
