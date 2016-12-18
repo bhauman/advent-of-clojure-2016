@@ -4,12 +4,10 @@
   (str "...^^^^^..^...^...^^^^^^...^.^^^.^.^.^^.^^^"
        ".....^.^^^...^^^^^^.....^.^^...^^^^^...^.^^^.^^......^^^^"))
 
+(def t? #{"^^." ".^^" "^.." "..^"})
+
 (defn next-trap? [x]
-  (if (or (= '(\^ \^ \.) x)
-          (= '(\^ \. \.) x)
-          (= '(\. \. \^) x)
-          (= '(\. \^ \^) x))
-    \^ \.))
+  (if (t? (apply str x)) \^ \.))
 
 (defn next-row [r]
   (->> (cons \. (conj r \.))
@@ -18,8 +16,8 @@
 
 (defn find-answer [rows r]
   (->> (iterate next-row (vec r))
-       (take rows)
        (pmap #(count (filter #{\.} %)))
+       (take rows)
        (reduce +)))
 
 ;; part 1
