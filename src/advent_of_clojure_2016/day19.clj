@@ -26,6 +26,10 @@
 
 ;; this can be considered an alternate approach to part one as well
 
+;; A really good challenge is to use the approach above keeping in mind
+;; the fact that the second part just keeps eliminating two neighbors at a time
+;; starting at the opposite index - 1 in a cycle
+
 (defn opposite-index [cnt i]
   (mod (+ i (int (/ cnt 2))) cnt))
 
