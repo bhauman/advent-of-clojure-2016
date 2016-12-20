@@ -8,15 +8,13 @@
   (->> (slurp (io/resource "day20"))
       string/split-lines
       (map #(string/split % #"-"))
-      (map #(mapv biginteger %))
+      (map #(mapv read-string %))
       (mapv #(do (assert (apply < %)) %))
       sort))
 
-(defn overlap? [[[l h] [l2 h2]]] (>= (inc h) l2))
+(defn overlap? [[l h] [l2 h2]] (>= (inc h) l2))
 
-(defn merge-em [a b]
-  (let [[[l h] [l2 h2]] (sort [a b])]
-    [(min l l2) (max h h2)]))
+(defn merge-em [[l h] [l2 h2]] [(min l l2) (max h h2)])
 
 (defn merge-all [ips]
   (reduce (fn [[accum & xs :as st] nxt]
@@ -36,5 +34,5 @@
 (->> (merge-all data)
      (map size)
      (reduce +)
-     (- (inc (biginteger "4294967295"))))
+     (- (size [0 4294967295])))
 ;; => 146
