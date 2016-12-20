@@ -1,16 +1,15 @@
 (ns advent-of-clojure-2016.day20
   (:require
    [clojure.java.io :as io]
-   [clojure.string :as string]
-   [advent-of-clojure-2016.utils :as u]))
+   [clojure.string :as string]))
 
 (def data
   (->> (slurp (io/resource "day20"))
-      string/split-lines
-      (map #(string/split % #"-"))
-      (map #(mapv read-string %))
-      (mapv #(do (assert (apply < %)) %))
-      sort))
+       string/split-lines
+       (map #(string/split % #"-"))
+       (map #(mapv read-string %))
+       (mapv #(do (assert (apply < %)) %))
+       sort))
 
 (defn overlap? [[l h] [l2 h2]] (>= (inc h) l2))
 
