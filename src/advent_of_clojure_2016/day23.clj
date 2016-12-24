@@ -72,7 +72,9 @@
 
 (defn multiply [st]
   (-> st
-      (update-in ['a] + (* (get st 'c) (get st 'd)))
+      (update 'a + (* (get st 'c) (get st 'd)))
+      (assoc 'c 0)      
+      (assoc 'd 0)
       (update :pos + 5)))
 
 (defn run-prog [start-state]
