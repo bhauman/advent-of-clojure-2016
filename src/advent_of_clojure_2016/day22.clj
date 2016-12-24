@@ -6,15 +6,15 @@
    [medley.core :refer [distinct-by]]))
 
 (defn parse-input [s]
-  (->> s
-       (string/split-lines)
-       (drop 2)
-       (map #(re-seq #"\d+" %))
-       (map u/to-ints)
-       (map #(take 4 %))
-       (map #(partition 2 %))
-       (map #(mapv vec %))
-       (into (sorted-map))))
+  (into (sorted-map)
+        (comp
+         (drop 2)
+         (map #(re-seq #"\d+" %))
+         (map u/to-ints)
+         (map #(take 4 %))
+         (map #(partition 2 %))
+         (map #(mapv vec %)))
+        (string/split-lines s)))
 
 (def data (parse-input (slurp (io/resource "day22"))))
 
@@ -24,7 +24,8 @@
 (def empty-node (comp zero? used))
 
 (defn viable-pair? [a b]
-  (and (not (empty-node a))
+  (and a b
+       (not (empty-node a))
        (>= (available b) (used a))))
 
 ;; part 1
@@ -54,11 +55,11 @@
   (map #(mapv + a %) [[-1 0] [0 -1] [0 1] [1 0]]))
 
 (defn possible-moves [{:keys [last-move data]}]
-  (let [to-pos (first last-move)]
+  (let [to-pos  (first last-move)
+        to-data (get data to-pos)]
     (for [from-pos (connections to-pos)
-          :let [to-data   (get data to-pos)
-                from-data (get data from-pos)]
-          :when (and to-data from-data (viable-pair? from-data to-data))]
+          :let [from-data (get data from-pos)]
+          :when (viable-pair? from-data to-data)]
       [from-pos to-pos])))
 
 (defn make-move [{:keys [data g] :as st} [from to]]
