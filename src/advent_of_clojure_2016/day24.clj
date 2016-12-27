@@ -1,4 +1,4 @@
-(ns advent-eof-clojure-2016.day24
+(ns advent-of-clojure-2016.day24
   (:require
    [advent-of-clojure-2016.utils :as u]
    [clojure.java.io :as io]
