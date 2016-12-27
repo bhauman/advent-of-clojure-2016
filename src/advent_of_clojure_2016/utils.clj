@@ -1,5 +1,7 @@
 (ns advent-of-clojure-2016.utils)
 
+(defn log [x] (println "log: " (pr-str x)) x)
+
 (def transpose (partial apply mapv vector))
 
 (defn rotate-left [v i]
