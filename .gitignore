@@ -1,3 +1,4 @@
+resources/public
 /target
 /classes
 /checkouts
@@ -9,3 +10,7 @@ pom.xml.asc
 /.nrepl-port
 .hgignore
 .hg/
+.\#*
+
+resources/day22.cjmurphy
+figwheel_server.log

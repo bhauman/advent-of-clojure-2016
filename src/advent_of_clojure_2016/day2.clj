@@ -12,7 +12,7 @@
 (def pos-number #(+ 5 (* 3 (second %)) (first %)))
 
 (defn in-bounds? [[x y]]
-  (and #(<= -1 x 1) #(<= -1 y 1)))
+  (and (<= -1 x 1) (<= -1 y 1)))
 
 (defn code-to-pos [bound-fn start code]
   (->> code
