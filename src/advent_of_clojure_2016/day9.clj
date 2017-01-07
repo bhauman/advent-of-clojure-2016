@@ -26,7 +26,7 @@
   (loop [accum [] data d]
     (cond
       (empty? data) (apply str accum)
-      (starts-with-directive? d)
+      (starts-with-directive? data)
       (let [[ac s] (parse-directive data)]
         (recur (concat accum ac) s))
       :else (recur (conj (vec accum) (first data)) (rest data)))))
@@ -43,7 +43,7 @@
       (when-let [[[cnt rpt] s] (parse-dir data)]
         (let [[part s] (split-at cnt s)]
           (recur (+ accum
-                    (* rpt (if (has-directive? part) (part22 part) (count part))))
+                    (* rpt (if (has-directive? part) (part2 part) (count part))))
                  s)))
       :else (recur (inc accum) (rest data)))))
 
