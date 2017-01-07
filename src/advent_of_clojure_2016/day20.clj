@@ -24,14 +24,14 @@
           ips))
 
 ;; part 1
-(-> (merge-all data) last last inc)
+#_(-> (merge-all data) last last inc)
 ;; => 4793564
 
 (defn size [[l h]] (inc (- h l)))
 
 ;; part 2
-(->> (merge-all data)
-     (map size)
-     (reduce +)
-     (- (size [0 4294967295])))
+#_(->> (merge-all data)
+       (map size)
+       (reduce +)
+       (- (size [0 4294967295])))
 ;; => 146
