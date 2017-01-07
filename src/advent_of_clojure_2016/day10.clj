@@ -53,20 +53,20 @@
           (assoc :commands rest-commands)))))
 
 ;; part 1
-(->> (iterate transition-state (make-init (map parse-line data)))
-     (take-while #(not (nil? %)))
-     (map :registers)
-     (keep #(some (fn [[k v]] (when (empty? (difference #{61 17} v)) k)) %))
-     first)
+#_(->> (iterate transition-state (make-init (map parse-line data)))
+       (take-while #(not (nil? %)))
+       (map :registers)
+       (keep #(some (fn [[k v]] (when (empty? (difference #{61 17} v)) k)) %))
+       first)
 ;;=> :bot161
 
 ;; part 2
-(->> (iterate transition-state (make-init (map parse-line data)))
-     (take-while #(not (nil? %)))
-     last
-     :registers
-     (#(select-keys % [:output0 :output1 :output2]))
-     vals
-     (map first)
-     (apply *))
+#_(->> (iterate transition-state (make-init (map parse-line data)))
+       (take-while #(not (nil? %)))
+       last
+       :registers
+       (#(select-keys % [:output0 :output1 :output2]))
+       vals
+       (map first)
+       (apply *))
 ;; => 133163
