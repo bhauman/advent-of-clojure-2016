@@ -30,6 +30,7 @@
        positions
        last
        point-to-dist)
+;; => 291
 
 ;; part 2
 #_(->> data
@@ -39,3 +40,4 @@
        (filter (fn [[x & xs]] ((set xs) x)))
        ffirst
        point-to-dist)
+;; => 159

@@ -17,6 +17,7 @@
        (map parse-triangle)
        (filter valid?)
        count)
+;; => 862
 
 (def transpose (partial apply mapv vector))
 
@@ -27,3 +28,4 @@
        (mapcat transpose)
        (filter valid?)
        count)
+;; => 1577

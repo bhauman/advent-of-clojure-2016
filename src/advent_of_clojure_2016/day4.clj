@@ -57,6 +57,9 @@
        (map parse-room)
        (filter real-room?)
        (map decrypt)
-       (filter #(re-matches #".*north.*" (:decrypted %))))
+       (filter #(re-matches #".*north.*" (:decrypted %)))
+       first
+       :id)
+;; => 267
 
 
