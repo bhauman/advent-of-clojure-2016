@@ -45,6 +45,8 @@
        (apply concat)
        (filter #{'X})
        count)
+;; => 121
 
 ;; part 2
 #_(reduce line-to-command board data)
+;; => RURUCEOEIL
