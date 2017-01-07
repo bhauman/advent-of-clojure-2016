@@ -20,7 +20,7 @@
 (defn move-position [s x y]
   (let [l   (nth s x)
         res (remove #(= l %) s)]
-    (into (take y res) (cons l (drop y res)))))
+    (concat (take y res) (cons l (drop y res)))))
 
 (defn reverse-positions [s x y]
   (let [part-size (inc (- y x))]
