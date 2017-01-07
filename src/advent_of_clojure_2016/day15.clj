@@ -20,7 +20,8 @@
        (filter #(completed (state-of-discs-at-t s %)))))
 
 (defn next-step [{:keys [pos step]} state]
-  (let [[next-pos after-pos] (take 2 (times-with-aligned-discs state pos step))]
+  (let [[next-pos after-pos]
+        (take 2 (times-with-aligned-discs state pos step))]
     {:pos next-pos :step (- after-pos next-pos)}))
 
 (defn find-answer [state]
@@ -28,8 +29,9 @@
 
 ;; part 1
 #_(find-answer start-state)
+;; => 16824
 
 #_(find-answer (conj start-state [0 11]))
-
+;; => 3543984
 
 
