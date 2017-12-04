@@ -11,9 +11,7 @@
                        #(string/split % #"\s+")))))
 
 (defn checksum-1 [row]
-  (->> ((juxt (partial reduce min) (partial reduce max)) row)
-       (apply -)
-       (Math/abs)))
+  (- (apply max row) (apply min row)))
 
 (and
   (= 8 (checksum-1 [5 1 9 5]))
