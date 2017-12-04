@@ -17,5 +17,6 @@
 (defn word-signature [word]
   (reduce #(merge-with (fnil + 0) %1 {%2 1}) {} word))
 
+;; part 2
 #_(count (filter #(= (count (m/distinct-by word-signature %)) (count %))
                  data))
