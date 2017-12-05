@@ -31,33 +31,33 @@
 
 ;; part 2
 #_(time
-   (r/reduce
-    (fn [^Long x _] (inc x)) ;; faster than (constantly 1)
+   (reduce
+    (fn [x _] (inc x))
     -1
     (eduction
      (take-while identity)
      (iterate interpret-2 [0 (transient data)]))))
 
-;Elapsed time: 7478.206687 msecs
-;=> 28178177
+;; Elapsed time: 5873.206687 msecs
+;; => 28178177
 
 ;; fastest with a native array and fully type hinted loop
-
 (comment
   (set! *warn-on-reflection* true)
   (set! *unchecked-math* :warn-on-boxed)
   )
 
 #_(time
-   (let [instructions ^ints (into-array Integer/TYPE data)]
+   (let [instructions ^ints (into-array Integer/TYPE data)
+         length ^int (count instructions)]
      (loop [step 0 position 0]
-       (if-let [inst (try (aget instructions position) (catch Throwable e nil))]
-         (let [inst ^int inst]
+       (if (< position length)
+         (let [inst (aget instructions position)]
            (aset instructions position
                  (if (>= inst 3) (dec inst) (inc inst)))
            (recur (inc step) (+ position inst)))
          step))))
-;; "Elapsed time: 663.752469 msecs"
+;; "Elapsed time: 198.752469 msecs"
 
 
 
