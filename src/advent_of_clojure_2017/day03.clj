@@ -56,6 +56,15 @@
 
 #_(->> neighbor-value-list
        (filter #(> % 347991))
-       first)
+     first)
+
+
+;; After looking at some others code I especially like this
+;; straightforward way of generating the spiral directions list
+
+#_(take 10 (mapcat
+            (fn [[i [dir1 dir2]]]
+              (vec (concat (repeat i dir1) (repeat i dir2))))
+            (map vector (rest (range)) (partition 2 (rest (cycle directions))))))
 
 
