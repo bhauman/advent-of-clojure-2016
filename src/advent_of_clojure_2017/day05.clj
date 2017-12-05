@@ -31,7 +31,7 @@
 #_(time
    (r/reduce
     (fn [a _] (inc a)) ;; faster than (constantly 1)
-    0
+    -1
     (eduction
      (take-while identity)
      (iterate interpret-2 [0 (transient data)]))))
