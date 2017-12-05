@@ -8,7 +8,8 @@
 (def data (->> (io/resource "2017/day05")
                io/reader
                line-seq
-               (mapv read-string)))
+               (mapv read-string)
+               (mapv int)))
 
 (defn interpret [{:keys [position instructions] :as env}]
   (when-let [inst (get instructions position)]
@@ -21,16 +22,17 @@
        (take-while identity)
        rest
        count)
+;;=> 358309
 
-(defn interpret-2 [[position instructions]]
-  (when-let [inst (get instructions position)]
+(defn interpret-2 [[^int position instructions]]
+  (when-let [inst ^int (get instructions position)]
     [(+ position inst)
      (assoc! instructions position (if (>= inst 3) (dec inst) (inc inst)))]))
 
 ;; part 2
 #_(time
    (r/reduce
-    (fn [a _] (inc a)) ;; faster than (constantly 1)
+    (fn [^Long x _] (inc x)) ;; faster than (constantly 1)
     -1
     (eduction
      (take-while identity)
@@ -39,41 +41,23 @@
 ;Elapsed time: 7478.206687 msecs
 ;=> 28178177
 
+;; fastest with a native array and fully type hinted loop
 
-;; faster to unroll the loop
-#_(time
-   (loop [step 0
-          position 0
-          instructions (transient data)]
-     (if-let [inst (get instructions position)]
-       (recur (inc step)
-              (+ position inst)
-              (assoc! instructions position (if (>= inst 3) (dec inst) (inc inst))))
-       step)))
-;; 5 seconds
-
-;; experimenting with perf improvements
-#_(time
- (loop [step 0
-        position 0
-        instructions (transient data)]
-   (if-let [inst ^Long (get instructions position)]
-     (recur ^Long (inc step)
-            ^Long (+ position inst)
-            (assoc! instructions position ^Long (if (>= inst 3) (dec inst) (inc inst))))
-     step)))
+(comment
+  (set! *warn-on-reflection* true)
+  (set! *unchecked-math* :warn-on-boxed)
+  )
 
 #_(time
- (let [instructions (into-array Integer/TYPE test-data)]
-   (loop [step ^int 0 position 0]
-     (when (zero? (rem step 100))
-       (prn step))
-     (if-let [inst ^int (get instructions position)]
-       (do
-         (aset instructions position ^int (if (>= inst 3) (dec inst) (inc inst)))
-         (recur ^int (inc step)
-                ^int (+ position inst)))
-     step))))
+   (let [instructions ^ints (into-array Integer/TYPE data)]
+     (loop [step 0 position 0]
+       (if-let [inst (try (aget instructions position) (catch Throwable e nil))]
+         (let [inst ^int inst]
+           (aset instructions position
+                 (if (>= inst 3) (dec inst) (inc inst)))
+           (recur (inc step) (+ position inst)))
+         step))))
+;; "Elapsed time: 663.752469 msecs"
 
 
 
