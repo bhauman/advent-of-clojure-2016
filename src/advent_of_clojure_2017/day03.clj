@@ -17,10 +17,11 @@
 (defn next-position [pos direction]
   (mapv + pos (directions direction)))
 
+(def spiral-positions-list
+  (reductions next-position [0 0] spiral-direction-list))
+
 (defn position-at-index [index]
-  (reduce next-position [0 0]
-          (take (dec index)
-                spiral-direction-list)))
+  (nth spiral-positions-list (dec index)))
 
 ;; part 1
 #_(->> (position-at-index 347991)
@@ -37,11 +38,9 @@
 (defn neigbor-values [pos positions]
   (keep positions (all-neigbor-positions pos)))
 
-(defn state-transition [{:keys [pos positions] :as state} dir]
-  (let [next-pos (next-position pos dir)
-        value    (apply + (neigbor-values next-pos positions))]
+(defn state-transition [{:keys [positions] :as state} next-pos]
+  (let [value (apply + (neigbor-values next-pos positions))]
     (-> state
-        (assoc    :pos   next-pos)
         (assoc    :value value)
         (assoc-in [:positions next-pos] value))))
 
@@ -49,14 +48,14 @@
   (map :value
        (reductions
         state-transition
-        {:pos [0 0]
-         :value 1
+        {:value 1
          :positions {[0 0] 1}}
-        spiral-direction-list)))
+        (rest spiral-positions-list))))
 
 ;; part 2
-(->> neighbor-value-list
-     (filter #(> % 347991))
-     first)
+
+#_(->> neighbor-value-list
+       (filter #(> % 347991))
+       first)
 
 
