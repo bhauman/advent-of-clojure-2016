@@ -27,8 +27,7 @@
 (defn part1 [instructions]
   (->> (reduce eval-exp {} instructions)
        vals
-       (sort >)
-       first))
+       (apply max)))
 
 ;; part 1
 #_(part1 data)
@@ -36,9 +35,9 @@
 
 (defn part2 [instructions]
   (->> (reductions eval-exp {} instructions)
-       (keep (comp first (partial sort >) vals))
-       (sort >)
-       first))
+       (keep vals)
+       (map (partial apply max))
+       (apply max)))
 
 ;; part 2
 #_(part2 data)
