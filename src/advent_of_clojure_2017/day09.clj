@@ -22,10 +22,10 @@
    (cond
      (number? data) 0
      (empty? data) depth
-     :else (+ depth (apply + (map #(count-em % (inc depth)) data))))))
+     :else (+ depth (apply + (map #(score % (inc depth)) data))))))
 
 ;; part 1
-#_ (time (score (parse-structure data)))
+#_ (score (parse-structure data))
 ;;=> 13154
 
 ;; part 2
