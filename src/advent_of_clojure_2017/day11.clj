@@ -35,9 +35,8 @@
 ;; the distance formula is (+ x y) if the point lies against
 ;; the direction of the diagonals
 
-(defn distance [[x y :as coord]]
-  (if (or (and (pos? x) (pos? y))
-          (and (neg? x) (neg? y)))
+(defn distance [coord]
+  (if (or (every? pos? coord) (every? neg? coord))
     (apply max (mapv #(Math/abs %) coord))
     (apply +   (mapv #(Math/abs %) coord))))
 
