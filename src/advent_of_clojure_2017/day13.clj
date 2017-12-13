@@ -28,14 +28,12 @@
 
 (defn build-can-pass-at-time?-fn [data']
   (let [data-size (apply max (keys data'))]
-    (fn [time-count]
+    (fn [time-offset]
       (some
-       (fn [idx]
+       (fn [[level range']]
          (zero?
-          (if-let [range' (data' idx)]
-            (scanner-position (+ idx time-count) range')
-            -1)))
-       (range (inc data-size))))))
+          (scanner-position (+ level time-offset) range')))
+       data'))))
 
 (defn how-many-pico-seconds-to-delay? [data']
   (->> (map (build-can-pass-at-time?-fn data') (range))
@@ -46,5 +44,4 @@
 #_ (time (how-many-pico-seconds-to-delay? data))
 ;; Elapsed time: 6779.875129 msecs
 ;; => 3937334
-
 
