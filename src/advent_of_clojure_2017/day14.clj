@@ -33,22 +33,22 @@
 (def directions [[0 1] [0 -1] [1 0] [-1 0]])
 
 (defn bit-on-at? [data [y x]]
-  (= \1 (.charAt (get data y) x)))
+  (= \1 (.charAt ^String (get data y) x)))
 
 (defn children [data pos]
   (->> directions
        (map #(mapv + pos %))
-       (filter (fn [[y x :as p]]
+       (filter (fn [[y x :as pos']]
                  (and (< -1 y 128)
                       (< -1 x 128)
-                      (bit-on-at? data p))))))
+                      (bit-on-at? data pos'))))))
 
-(defn group [data children-fn pos]
+(defn group [children-fn pos]
   (set (tree-seq
         (let [seen (atom #{})]
-          (fn [x] (when-not (@seen x)
-                    (swap! seen conj x)
-                    (not-empty (children-fn x)))))
+          (fn [pos] (when-not (@seen pos)
+                      (swap! seen conj pos)
+                      (not-empty (children-fn pos)))))
         children-fn
         pos)))
 
@@ -59,10 +59,10 @@
                 y (range 128)
                 :let [pos [y x]]
                 :when (bit-on-at? data pos)]
-            (group data children-fn pos)))))
+            (group children-fn pos)))))
 
 ;; part 2
 #_(time (count (all-groups data)))
-;; Elapsed time: 3957.949806 msecs
+;; Elapsed time: 3772.082083 msecs
 ;; => 1164
 
