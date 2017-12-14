@@ -25,6 +25,7 @@
        (map (comp count (partial filter #{\1})))
        (reduce +)
        time)
+;; Elapsed time: 3068.830745 msec
 ;; => 8106
 
 (def data (->> (disk-sector-map puzzle-input)
@@ -44,7 +45,7 @@
    (filter #(= 1 (get-in data %))
            (pos->directions pos))))
 
-(defn group [data chidren-fn pos]
+(defn group [data children-fn pos]
   (set (tree-seq
          (let [seen (atom #{})]
            (fn [x] (when-not (@seen x)
@@ -52,8 +53,8 @@
                        (swap! seen conj x)
                        (and
                         (not= 0 (get-in data x))
-                        (not-empty (chidren-fn x)))))))
-         chidren-fn
+                        (not-empty (children-fn x)))))))
+         children-fn
          pos)))
 
 (defn all-groups [data]
