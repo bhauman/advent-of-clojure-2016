@@ -28,34 +28,29 @@
 ;; Elapsed time: 3068.830745 msec
 ;; => 8106
 
-(def data (->> (disk-sector-map puzzle-input)
-               (mapv (partial mapv {\1 1 \space 0 \0 0}))))
+(def data (disk-sector-map puzzle-input))
 
 (def directions [[0 1] [0 -1] [1 0] [-1 0]])
 
-(defn pos->directions [pos]
-  (->> (mapv #(mapv + pos %)  directions)
-       ;; not really needed but saves a few steps
-       (filter (fn [[y x]] (and
-                            (< -1 y 128)
-                            (< -1 y 128))))))
+(defn bit-on-at? [data [y x]]
+  (= \1 (.charAt (get data y) x)))
 
 (defn children [data pos]
-  (doall
-   (filter #(= 1 (get-in data %))
-           (pos->directions pos))))
+  (->> directions
+       (map #(mapv + pos %))
+       (filter (fn [[y x :as p]]
+                 (and (< -1 y 128)
+                      (< -1 x 128)
+                      (bit-on-at? data p))))))
 
 (defn group [data children-fn pos]
   (set (tree-seq
-         (let [seen (atom #{})]
-           (fn [x] (when-not (@seen x)
-                     (do
-                       (swap! seen conj x)
-                       (and
-                        (not= 0 (get-in data x))
-                        (not-empty (children-fn x)))))))
-         children-fn
-         pos)))
+        (let [seen (atom #{})]
+          (fn [x] (when-not (@seen x)
+                    (swap! seen conj x)
+                    (not-empty (children-fn x)))))
+        children-fn
+        pos)))
 
 (defn all-groups [data]
   (let [children-fn (memoize (partial children data))]
@@ -63,7 +58,7 @@
           (for [x (range 128)
                 y (range 128)
                 :let [pos [y x]]
-                :when (not (zero? (get-in data pos)))]
+                :when (bit-on-at? data pos)]
             (group data children-fn pos)))))
 
 ;; part 2
