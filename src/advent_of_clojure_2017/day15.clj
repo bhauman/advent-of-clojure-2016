@@ -7,11 +7,12 @@
 (def b-transition (partial transition 48271))
 
 (defn generate [a-start b-start]
-  (map =
-       (map #(bit-and 2r1111111111111111 ^long %) 
-            (iterate a-transition a-start))
-       (map #(bit-and 2r1111111111111111 ^long %)
-            (iterate b-transition b-start))))
+  (rest
+   (map =
+        (map #(bit-and 2r1111111111111111 ^long %) 
+             (iterate a-transition a-start))
+        (map #(bit-and 2r1111111111111111 ^long %)
+             (iterate b-transition b-start)))))
 
 ;; part 1
 #_(time
@@ -21,13 +22,14 @@
 ;; => 650
 
 (defn generate-2 [a-start b-start]
-  (map =
-       (map #(bit-and 2r1111111111111111 ^long %) 
-            (filter #(zero? ^long (mod ^long % 4))
-                    (iterate a-transition a-start)))
-       (map #(bit-and 2r1111111111111111 ^long %)
-            (filter #(zero? ^long (mod ^long % 8))
-                    (iterate b-transition b-start)))))
+  (rest
+   (map =
+        (map #(bit-and 2r1111111111111111 ^long %) 
+             (filter #(zero? ^long (mod ^long % 4))
+                     (iterate a-transition a-start)))
+        (map #(bit-and 2r1111111111111111 ^long %)
+             (filter #(zero? ^long (mod ^long % 8))
+                     (iterate b-transition b-start))))))
 
 #_(set! *unchecked-math* :warn-on-boxed)
 
