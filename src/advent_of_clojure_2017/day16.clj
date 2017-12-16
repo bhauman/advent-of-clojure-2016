@@ -45,11 +45,10 @@
 
 ;; strategy find a period for which the pattern repeats itself
 (defn find-cycle-period [whole-dance-seq]
-  (let [cycle-marker (first whole-dance-seq)]
-    (->> (rest whole-dance-seq)
-         (take-while #(not= start-state %))
-         count
-         inc)))
+  (->> (rest whole-dance-seq)
+       (take-while #(not= (first whole-dance-seq) %))
+       count
+       inc))
 
 #_ (find-cycle-period complete-dances)
 ;; => 56
@@ -63,7 +62,7 @@
         (mod 1000000000)
         (nth complete-dances)
         (string/join ""))
-;; => [e j k f l p g n a m h d c b o i]
+;; => ejkflpgnamhdcboi
 
 
 
