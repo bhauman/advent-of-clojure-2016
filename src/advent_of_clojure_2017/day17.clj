@@ -39,3 +39,28 @@
        time)
 ;; => 27650600
 ;; around 5 minutes to complete
+
+
+;; idea from @val_waeselynck
+
+;; better solution for part 2 is to just find the last change to the 1 position
+;; this only works for the 1 position in the puzzle, this is a bit subtle
+
+(defn transition [^long position ^long v]
+  (inc ^long (mod (+ position ^long input-steps) v)))
+
+(defn find-last-after-zero [cycles]
+  (loop [n 1
+         pos 0
+         after-zero nil]
+    (let [next-pos (transition pos n)]
+      (if (= n cycles)
+        after-zero
+        (recur (inc n)
+               ^long next-pos
+               (if (= 1 ^long next-pos) n after-zero))))))
+
+;; better part 2
+#_(time (find-last-after-zero (inc 50000000)))
+;; => 27650600
+;; Elapsed time: 4738.406857 msecs
