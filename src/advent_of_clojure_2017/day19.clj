@@ -6,21 +6,18 @@
   (->> (io/resource "2017/day19")
        io/reader
        line-seq
-       vec))
+       (mapv vec)))
 
 (def directions [[1 0] [-1 0] [0 1] [0 -1]])
 
 (defn letter? [char']
   (<= (int \A) (int char') (int \Z)))
 
-(defn char-at-position [char-map [y x :as pos]]
-  (.charAt ^String (get char-map y) x))
-
 (defn starting-x [char-map]
-  (.indexOf (first char-map) (int \|)))
+  (.indexOf (first char-map) \|))
 
 (defn next-directions [char-map [pos prev-pos]]
-  (if (not= \+ (char-at-position char-map pos))
+  (if (not= \+ (get-in char-map pos))
     [(mapv - pos prev-pos)]
     directions))
 
@@ -28,17 +25,18 @@
   (->> (next-directions char-map state)
        (mapv (partial mapv + pos))
        (filter #(not= prev-pos %))
-       (filter #(not= \space (char-at-position char-map %)))
+       (filter #(not= \space (get-in char-map %)))
        first))
 
 (defn move [char-map [pos :as state]]
   [(next-position char-map state) pos])
 
 #_(->> (iterate (partial move data)
-                [[0 (starting-x data)] [-1 (starting-x data)]])
+                (let [start-x (starting-x data)]
+                  [[0 start-x] [-1 start-x]]))
        (map first)
        (take-while identity)
-       (map (partial char-at-position data))
+       (map (partial get-in data-2))
        (filter letter?)
        (apply str)
        time)
