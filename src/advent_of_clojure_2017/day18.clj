@@ -72,29 +72,29 @@
       ;; send to output queue
       'snd (inc-program-counter
             (-> state
-                (assoc :output-queue (reg-or-val state X))
+                (assoc :output-val (reg-or-val state X))
                 ;; count the messages sent
-                (update :output-queue-count (fnil inc 0))))
+                (update :output-count (fnil inc 0))))
       ;; recieve from input queue
-      'rcv (if (empty? (:input-queue state))
-             (assoc state :blocking true)
-             (inc-program-counter
-              (let [[input & input-queue] (:input-queue state)]
+      'rcv (let [{:keys [input-queue]} state]
+             (if (empty? input-queue)
+               (assoc state :blocking true)
+               (inc-program-counter
                 (assoc state
-                       X input
-                       :input-queue (vec input-queue)))))
+                       X (peek input-queue)
+                       :input-queue (pop input-queue)))))
       ;; forward to part 1 interpreter
       (instruct state inst))))
 
-(defn state-to-state-communication-step [[state-a {:keys [output-queue] :as state-b} :as states]]
-  (if output-queue
-    [(update state-a :input-queue (fnil conj []) output-queue)
-     (dissoc state-b :output-queue)]
+(defn swap-communication-step [[state-a {:keys [output-val] :as state-b} :as states]]
+  (if output-val
+    [(update state-a :input-queue (fnil conj clojure.lang.PersistentQueue/EMPTY) output-val)
+     (dissoc state-b :output-val)]
     states))
 
-(def state-to-state-communication
-  (comp reverse state-to-state-communication-step
-        reverse state-to-state-communication-step))
+(def swap-communication
+  (comp reverse swap-communication-step
+        reverse swap-communication-step))
 
 (defn exec-instruction [{:keys [program-counter program] :as state}]
   (if-let [instruction (get program program-counter)]
@@ -102,7 +102,7 @@
     (assoc state :blocking true)))
 
 (defn transition-2 [states]
-  (mapv exec-instruction (state-to-state-communication states)))
+  (mapv exec-instruction (swap-communication states)))
 
 ;; part 2
 #_(->> (iterate transition-2
@@ -117,8 +117,9 @@
        (drop-while #(not (every? :blocking %)))
        first
        second
-       :output-queue-count
+       :output-count
        time)
+
 ;; not publishing until later as the inputs are similar
 ;; Elapsed time: 439.798548 msecs
 
