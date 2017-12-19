@@ -36,7 +36,7 @@
                   [[0 start-x] [-1 start-x]]))
        (map first)
        (take-while identity)
-       (map (partial get-in data-2))
+       (map (partial get-in data))
        (filter letter?)
        (apply str)
        time)
@@ -46,7 +46,8 @@
 
 ;; part 2
 #_(->> (iterate (partial move data)
-                [[0 (starting-x data)] [-1 (starting-x data)]])
+                (let [start-x (starting-x data)]
+                  [[0 start-x] [-1 start-x]]))
        (map first)
        (take-while identity)
        count
