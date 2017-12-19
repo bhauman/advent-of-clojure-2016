@@ -28,9 +28,6 @@
 (defn next-positions [char-map [pos :as state]]
   (->> (next-directions char-map state)
        (mapv (partial mapv + pos))
-       (filter (fn [[y x]]
-                 (and (< -1 x (count (first char-map)))
-                      (< -1 y (count char-map)))))
        (filter #(not= \space (char-at-position char-map %)))))
 
 (defn move [char-map [pos :as state]]
