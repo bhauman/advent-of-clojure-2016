@@ -69,15 +69,6 @@
 
 ;; memoized recursive solution to part 2, it should be much faster
 
-(declare count-at-depth)
-
-(defn count-at-depth-helper [depth grid]
-  (->> (break-into grid 2)
-       (apply concat)
-       (map rules)
-       (map #(count-at-depth (dec depth) %))
-       (reduce +)))
-
 (defn count-at-depth [depth grid]
   (if (zero? depth)
     (count (filter #{\#} (flatten grid)))
@@ -93,8 +84,11 @@
           ;; end of road
           (= depth 1)
           (count-at-depth (dec depth) (rules grid)))
-      4 (count-at-depth-helper depth grid)
-      6 (count-at-depth-helper depth grid))))
+      6 (->> (break-into grid 2)
+             (apply concat)
+             (map rules)
+             (map #(count-at-depth (dec depth) %))
+             (reduce +)))))
 
 ;; part 2
 #_(with-redefs [count-at-depth (memoize count-at-depth)]
