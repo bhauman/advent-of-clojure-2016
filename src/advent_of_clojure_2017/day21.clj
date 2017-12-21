@@ -66,3 +66,38 @@
 ;; => 1857134
 ;; Elapsed time: 19130.777919 msecs
 
+
+;; memoized recursive solution to part 2, it should be much faster
+
+(declare count-at-depth)
+
+(defn count-at-depth-helper [depth grid]
+  (->> (break-into grid 2)
+       (apply concat)
+       (map rules)
+       (map #(count-at-depth (dec depth) %))
+       (reduce +)))
+
+(defn count-at-depth [depth grid]
+  (if (zero? depth)
+    (count (filter #{\#} (flatten grid)))
+    (condp = (count grid)
+      2 (count-at-depth (dec depth) (rules grid))
+      3 (cond
+          ;; jump over ambiguity
+          (>= depth 2)
+          (count-at-depth (- depth 2)
+                          (->> grid
+                               (apply-rules rules)
+                               (apply-rules rules)))
+          ;; end of road
+          (= depth 1)
+          (count-at-depth (dec depth) (apply-rules rules grid)))
+      4 (count-at-depth-helper depth grid)
+      6 (count-at-depth-helper depth grid))))
+
+;; part 2
+#_(with-redefs [count-at-depth (memoize count-at-depth)]
+    (time (count-at-depth 18 start-pixels)))
+;; => 1857134
+;; Elapsed time: 5.832728 msecs
