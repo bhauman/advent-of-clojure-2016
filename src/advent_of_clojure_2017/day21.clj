@@ -53,14 +53,16 @@
   (->> (nth (iterate (partial apply-rules rules) start-pixels) n)
        flatten
        (filter #{\#})
-       count))
+       count
+       time))
 
 ;; part 1
 #_ (pixels-on-at 5 start-pixels)
 ;; => 139
+;; Elapsed time: 1.537593 msecs
 
 ;; part 2
 #_ (pixels-on-at 18 start-pixels)
 ;; => 1857134
-
+;; Elapsed time: 19130.777919 msecs
 
