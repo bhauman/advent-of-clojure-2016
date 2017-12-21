@@ -86,7 +86,7 @@
       3 (cond
           ;; jump over ambiguity
           (>= depth 2)
-          (count-at-depth (- depth 2s)
+          (count-at-depth (- depth 2)
                           (->> grid
                                rules
                                (apply-rules rules)))
