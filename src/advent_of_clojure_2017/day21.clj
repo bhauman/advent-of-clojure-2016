@@ -86,13 +86,13 @@
       3 (cond
           ;; jump over ambiguity
           (>= depth 2)
-          (count-at-depth (- depth 2)
+          (count-at-depth (- depth 2s)
                           (->> grid
-                               (apply-rules rules)
+                               rules
                                (apply-rules rules)))
           ;; end of road
           (= depth 1)
-          (count-at-depth (dec depth) (apply-rules rules grid)))
+          (count-at-depth (dec depth) (rules grid)))
       4 (count-at-depth-helper depth grid)
       6 (count-at-depth-helper depth grid))))
 
