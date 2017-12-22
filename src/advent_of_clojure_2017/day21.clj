@@ -74,15 +74,13 @@
     (count (filter #{\#} (flatten grid)))
     (condp = (count grid)
       2 (count-at-depth (dec depth) (rules grid))
-      3 (cond
+      3 (if (>= depth 2)
           ;; jump over ambiguity
-          (>= depth 2)
           (count-at-depth (- depth 2)
                           (->> grid
                                rules
                                (apply-rules rules)))
           ;; end of road
-          (= depth 1)
           (count-at-depth (dec depth) (rules grid)))
       6 (->> (break-into grid 2)
              (apply concat)
