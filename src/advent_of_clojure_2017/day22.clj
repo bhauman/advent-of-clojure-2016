@@ -98,5 +98,6 @@
             (nth n)
             :infect-count))
 ;; => 2512144
+;; Elapsed time: 45868.547871 msecs
 
 
