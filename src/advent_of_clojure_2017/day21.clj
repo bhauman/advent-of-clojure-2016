@@ -40,49 +40,29 @@
 (defn normalize [broken-out]
   (mapcat #(map flatten (transpose %)) broken-out))
 
-(defn apply-rules [rules grid]
-  (->> (let [height (count grid)]
-         (cond
-           (zero? (mod height 2)) 2
-           (zero? (mod height 3)) 3))
-       (break-into grid)
-       (map #(map rules %))
-       normalize))
-
-(defn pixels-on-at [n start-pixels]
-  (->> (nth (iterate (partial apply-rules rules) start-pixels) n)
-       flatten
-       (filter #{\#})
-       count
-       time))
-
-;; part 1
-#_ (pixels-on-at 5 start-pixels)
-;; => 139
-;; Elapsed time: 1.537593 msecs
-
-;; part 2
-#_ (pixels-on-at 18 start-pixels)
-;; => 1857134
-;; Elapsed time: 19130.777919 msecs
-
-
-;; memoized recursive solution to part 2, it should be much faster
+;; memoized recursive solution
 (defn count-at-depth [depth grid]
   (if (zero? depth)
     (count (filter #{\#} (flatten grid)))
     (condp = (count grid)
       2 (count-at-depth (dec depth) (rules grid))
       3 (count-at-depth (dec depth) (rules grid))
-      4 (count-at-depth (dec depth) (apply-rules rules grid))
+      4 (count-at-depth (dec depth) (->> (break-into grid 2) 
+                                         (map (partial map rules))
+                                         normalize))
       6 (->> (break-into grid 2)
-             (apply concat)
-             (map rules)
+             (mapcat (partial map rules))
              (map #(count-at-depth (dec depth) %))
              (reduce +)))))
+
+;; part 1
+#_(with-redefs [count-at-depth (memoize count-at-depth)]
+    (time (count-at-depth 5 start-pixels)))
+;; => 139
+;; Elapsed time: 1.537593 msecs
 
 ;; part 2
 #_(with-redefs [count-at-depth (memoize count-at-depth)]
     (time (count-at-depth 18 start-pixels)))
 ;; => 1857134
-;; Elapsed time: 5.832728 msecs
+;; Elapsed time: 15.000658 msec
