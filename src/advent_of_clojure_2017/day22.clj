@@ -31,9 +31,8 @@
 (def turn-left   (comp #(mod % 4) dec))
 
 (defn turn [{:keys [board position] :as state}]
-  (if (= "#" (get board position))
-    (update state :direction turn-right)
-    (update state :direction turn-left)))
+  (->> (if (= "#" (get board position)) turn-right turn-left)
+       (update state :direction)))
 
 (defn infect-node [{:keys [board position] :as state}]
   (if (= "#" (get board position))
