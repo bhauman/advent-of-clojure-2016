@@ -68,20 +68,13 @@
 
 
 ;; memoized recursive solution to part 2, it should be much faster
-
 (defn count-at-depth [depth grid]
   (if (zero? depth)
     (count (filter #{\#} (flatten grid)))
     (condp = (count grid)
       2 (count-at-depth (dec depth) (rules grid))
-      3 (if (>= depth 2)
-          ;; jump over ambiguity
-          (count-at-depth (- depth 2)
-                          (->> grid
-                               rules
-                               (apply-rules rules)))
-          ;; end of road
-          (count-at-depth (dec depth) (rules grid)))
+      3 (count-at-depth (dec depth) (rules grid))
+      4 (count-at-depth (dec depth) (apply-rules rules grid))
       6 (->> (break-into grid 2)
              (apply concat)
              (map rules)
