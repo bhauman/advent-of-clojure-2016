@@ -44,9 +44,6 @@
 (defn move-forward [{:keys [direction] :as state}]
   (update state :position #(mapv + % (get directions direction))))
 
-(defn step [{:keys [board position direction] :as state}]
-  (->> state turn infect-node move-forward))
-
 ;; we really have to render the board to verify that the state machine is working
 (defn render-board [{:keys [board position]}]
   (let [min-coord (apply min (flatten (cons position (keys board))))
@@ -63,15 +60,12 @@
     nil))
 
 ;; verify that everything looks right
-#_(render-board (nth (iterate step (start-board test-data)) 7))
-
-(defn count-bursts-of-activity [start-data n]
-  (-> (iterate step (start-board start-data))
-      (nth n)
-      :infect-count))
+#_(render-board (nth (iterate (comp move-forward infect-node turn) (start-board test-data)) 7))
 
 ;; part 1
-#_ (time (count-bursts-of-activity data 10000))
+#_ (time (-> (iterate (comp move-forward infect-node turn) (start-board data))
+             (nth 10000)
+             :infect-count))
 ;; 5240
 ;; Elapsed time: 41.665846 msecs
 
@@ -96,22 +90,13 @@
     (= "W" (board position)) (update :infect-count (fnil inc 0))
     :else (update-in [:board position] state-transition)))
 
-(defn step-2 [{:keys [position] :as state}]
-  (-> state
-      turn-2
-      update-node
-      move-forward))
-
 ;; render the board
-#_(render-board (nth (iterate step-2 (start-board test-data)) 5))
-
-(defn count-bursts-of-activity-2 [start-data n]
-  (-> (iterate step-2 (start-board start-data))
-      (nth n)
-      :infect-count))
+#_(render-board (nth (iterate (comp move-forward update-node turn-2) (start-board test-data)) 5))
 
 ;; part 2
-#_(time (count-bursts-of-activity-2 data 10000000))
+#_(time (-> (iterate (comp move-forward update-node turn-2) (start-board start-data))
+            (nth n)
+            :infect-count))
 ;; => 2512144
 
 
