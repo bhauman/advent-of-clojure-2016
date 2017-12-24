@@ -29,10 +29,8 @@
 (defn strength [parts]
   (reduce + 0 (flatten parts)))
 
-(defn other-member [head part]
-  (assert ((set part) head))
-  (or (first (filter #(not= head %) part))
-      head))
+(defn other-member [h? [h t]]
+  (if (= h? h) t h))
 
 ;; ignores partial briges as they don't matter for solution
 (defn all-bridges [parts-index main-part tail-part]
@@ -67,36 +65,35 @@
 ;; A tree-seq based solution
 ;; it collects the needed totals as it travels
 
-(defn branch? [[parts-index main-part tail-part strength-total count-total]]
-  (parts-index tail-part))
+(defn branch? [[parts-index available-pin strength-total length]]
+  (parts-index available-pin))
 
-(defn children [[parts-index main-part tail-part strength-total count-total]]
-  (when-let [childs (parts-index tail-part)]
+(defn children [[parts-index available-pin strength-total length]]
+  (when-let [childs (parts-index available-pin)]
     (map
      (fn [next-part]
        [(remove-part parts-index next-part)
-        next-part
-        (other-member tail-part next-part)
+        (other-member available-pin next-part)
         (+ strength-total (apply + next-part))
-        (inc count-total)])
+        (inc length)])
      childs)))
 
 ;; part 1
-#_(->> (tree-seq branch? children [index [0 0] 0 0 0])
-       (map #(nth % 3))
+#_(->> (tree-seq branch? children [index 0 0 0])
+       (map #(nth % 2))
        (reduce max)
        time)
 ;; => 1906
-;; Elapsed time: 5356.55631 msecs
+;; Elapsed time: 4472.040553 msecs
 
 ;; part 2
 #_(time
-   (let [bridges (tree-seq branch? children [index [0 0] 0 0 0])
+   (let [bridges (tree-seq branch? children [index 0 0 0])
          max-length (reduce max (map last bridges))]
      (->> bridges
           (filter #(= (last %) max-length))
           (map #(nth % 3))
           (reduce max))))
 ;; => 1824
-;; Elapsed time: 7135.486059 msecs
+;; Elapsed time: 6435.686022 msecs
 
