@@ -63,3 +63,40 @@
 ;; Elapsed time: 3697.887612 msec
 
 
+
+;; A tree-seq based solution
+;; it collects the needed totals as it travels
+
+(defn branch? [[parts-index main-part tail-part strength-total count-total]]
+  (parts-index tail-part))
+
+(defn children [[parts-index main-part tail-part strength-total count-total]]
+  (when-let [childs (parts-index tail-part)]
+    (map
+     (fn [next-part]
+       [(remove-part parts-index next-part)
+        next-part
+        (other-member tail-part next-part)
+        (+ strength-total (apply + next-part))
+        (inc count-total)])
+     childs)))
+
+;; part 1
+#_(->> (tree-seq branch? children [index [0 0] 0 0 0])
+       (map #(nth % 3))
+       (reduce max)
+       time)
+;; => 1906
+;; Elapsed time: 5356.55631 msecs
+
+;; part 2
+#_(time
+   (let [bridges (tree-seq branch? children [index [0 0] 0 0 0])
+         max-length (reduce max (map last bridges))]
+     (->> bridges
+          (filter #(= (last %) max-length))
+          (map #(nth % 3))
+          (reduce max))))
+;; => 1824
+;; Elapsed time: 7135.486059 msecs
+
