@@ -36,7 +36,7 @@
 
 ;; ignores partial briges as they don't matter for solution
 (defn all-bridges [parts-index main-part tail-part]
-  (if (or (empty? parts-index) (empty? (parts-index tail-part)))
+  (if (empty? (parts-index tail-part))
     [[main-part]]
     (->> (parts-index tail-part)
          (mapcat #(all-bridges (remove-part parts-index %) % (other-member tail-part %)))
