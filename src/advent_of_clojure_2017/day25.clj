@@ -5,11 +5,11 @@
 
 (defn parse-state-program [state-program]
   (mapv (comp
-        read-string
-        #(subs % 0 (dec (count %)))
-        last
-        #(string/split % #"\s"))
-       state-program))
+         read-string
+         #(subs % 0 (dec (count %)))
+         last
+         #(string/split % #"\s"))
+        state-program))
 
 (def tape-program
   (->> (io/resource "2017/day25")
@@ -31,7 +31,7 @@
 (defn transition [state-machine [state ^long position tape]]
   (let [[write direction next-state] (get-in state-machine [state (get tape position 0)])]
     [next-state
-     ((if (= 'right direction) (fnil inc 0) (fnil dec 0)) position)
+     ((if (= 'right direction) inc dec) position)
      (assoc tape position write)]))
 
 #_(->> (nth (iterate (partial transition state-machine) ['A 0 {}])
