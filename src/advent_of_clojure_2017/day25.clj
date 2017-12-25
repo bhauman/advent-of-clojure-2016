@@ -21,29 +21,24 @@
        (map parse-state-program)))
 
 (defn options->machine [machine [state current write direction next-state]]
-  (assoc machine [state current] [write direction next-state]))
+  (assoc-in machine [state current] [write direction next-state]))
 
 (defn program->state-machine [machine [state & args]]
   (reduce options->machine machine (map #(cons state %) (partition 4 args))))
 
 (def state-machine (reduce program->state-machine {} tape-program))
 
-(defn transition [{:keys [state-machine state position tape] :as turing}]
-  (let [[write direction next-state] (get state-machine [state (get tape position 0)])]
-    (-> turing
-        (assoc-in [:tape position] write)
-        (update :position (if (= 'right direction) (fnil inc 0) (fnil dec 0)))
-        (assoc :state next-state))))
+(defn transition [state-machine [state ^long position tape]]
+  (let [[write direction next-state] (get-in state-machine [state (get tape position 0)])]
+    [next-state
+     ((if (= 'right direction) (fnil inc 0) (fnil dec 0)) position)
+     (assoc tape position write)]))
 
-#_(->> (nth (iterate transition {:state-machine state-machine
-                                 :state 'A
-                                 :position 0
-                                 :tape {}})
+#_(->> (nth (iterate (partial transition state-machine) ['A 0 {}])
             12368930)
-       :tape
+       last
        vals
-       (filter #{1})
-       count
+       (reduce +)
        time)
 ;; => 2725
-;;Elapsed time: 23475.201042 msecs
+;; Elapsed time: 14319.600632 msecs
